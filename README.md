@@ -5,8 +5,6 @@ A full-stack multi-agent chat system with specialized AI agents for Python code 
 ## Project Structure
 
 - `backend/` - FastAPI backend
-  - `src/` - Core application code
-  - `database/` - SQLite database storage
 - `frontend/` - Next.js frontend
 
 ## Getting Started
