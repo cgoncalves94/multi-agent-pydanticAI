@@ -1,6 +1,6 @@
 # Pydantic Chatbot
 
-A multi-agent chat system with specialized AI agents for code generation, web search, and image analysis.
+A full-stack multi agent chat system with specialized AI agents for python code generation, web search, and image analysis.
 
 ## Project Structure
 
