@@ -1,0 +1,15 @@
+[project]
+name = "pydantic-chatbot"
+version = "0.1.0"
+description = "Chatbot with Pydantic"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "duckduckgo-search>=7.5.3",
+    "fastapi>=0.115.11",
+    "logfire>=3.9.0",
+    "openai>=1.68.2",
+    "pre-commit>=4.2.0",
+    "pydantic-ai>=0.0.43",
+    "python-multipart>=0.0.20",
+]
