@@ -1,0 +1,36 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.8",
+    "@mui/material": "^6.4.8",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.7",
+    "next": "15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "shiki": "^1.1.7",
+    "react-syntax-highlighter": "^15.6.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
