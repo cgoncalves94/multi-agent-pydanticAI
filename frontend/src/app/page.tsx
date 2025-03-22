@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, styled, IconButton, Switch, FormControlLabel, Tooltip } from '@mui/material';
+import { Box, styled, IconButton, Tooltip } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { Session, Message } from '@/types';
 import LeftSidebar from '@/components/sidebars/LeftSidebar';
@@ -189,11 +189,6 @@ const Copyright = styled(Box)(({ theme }) => ({
   fontWeight: 500,
 }));
 
-const DebugContainer = styled(Box)({
-  gridColumn: 3,
-  justifySelf: 'end',
-});
-
 export default function Page() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
@@ -201,7 +196,6 @@ export default function Page() {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [apiConnected, setApiConnected] = useState(false);
-  const [debugMode, setDebugMode] = useState(false);
   const [streamMode, setStreamMode] = useState(true);
 
   useEffect(() => {
@@ -386,19 +380,6 @@ export default function Page() {
         <Copyright>
           © 2024 Chatbot
         </Copyright>
-        <DebugContainer>
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                checked={debugMode}
-                onChange={(e) => setDebugMode(e.target.checked)}
-              />
-            }
-            label="Debug Mode"
-            sx={{ opacity: 0.7, '&:hover': { opacity: 1 } }}
-          />
-        </DebugContainer>
       </Footer>
     </AppContainer>
   );

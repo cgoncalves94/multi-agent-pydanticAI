@@ -1,8 +1,13 @@
 'use client';
 
-import { Box, Paper, Typography, styled, Link } from '@mui/material';
+import { Box, Paper, Typography, styled, Link, IconButton, Tooltip } from '@mui/material';
 import { Message } from '@/types';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { ComponentPropsWithoutRef, useState } from 'react';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 interface MessageContainerProps {
   'data-role': 'user' | 'assistant' | 'system' | 'model';
@@ -20,7 +25,7 @@ const MessageContainer = styled(Box)<MessageContainerProps>(({ theme, 'data-role
 }));
 
 const MessageBubble = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1.5, 2),
+  padding: theme.spacing(1.2, 1.8),
   borderRadius: theme.spacing(2),
   '&[data-role="user"]': {
     backgroundColor: theme.palette.primary.main,
@@ -40,7 +45,7 @@ const MessageBubble = styled(Paper)(({ theme }) => ({
     borderBottomLeftRadius: theme.spacing(0.5),
   },
   [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1.2, 1.5),
+    padding: theme.spacing(1, 1.2),
   }
 }));
 
@@ -57,9 +62,13 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const { content, role } = message;
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // All metadata (code blocks, search results, image analysis) is now displayed only in the sidebar
-  // We don't render metadata in the main chat messages anymore
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
 
   return (
     <MessageContainer data-role={role}>
@@ -70,8 +79,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             {content}
           </Typography>
         ) : (
-          // For assistant and system messages, use markdown
+          // For assistant and system messages, use enhanced markdown with syntax highlighting
           <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
             components={{
               p: (props) => (
                 <Typography
@@ -85,13 +95,40 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 />
               ),
               h1: (props) => (
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }} {...props} />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mt: 2,
+                    mb: 1,
+                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
+                    fontWeight: 600
+                  }}
+                  {...props}
+                />
               ),
               h2: (props) => (
-                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }} {...props} />
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    mt: 2,
+                    mb: 1,
+                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
+                    fontWeight: 600
+                  }}
+                  {...props}
+                />
               ),
               h3: (props) => (
-                <Typography variant="subtitle2" sx={{ mt: 1.5, mb: 0.5 }} {...props} />
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mt: 1.5,
+                    mb: 0.5,
+                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
+                    fontWeight: 600
+                  }}
+                  {...props}
+                />
               ),
               ul: (props) => (
                 <Box component="ul" sx={{ pl: 2, mt: 1 }} {...props} />
@@ -114,36 +151,76 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                   {...props}
                 />
               ),
-              code: (props) => (
-                <Typography
-                  component="code"
-                  sx={{
-                    backgroundColor: role === 'assistant' ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.15)',
-                    p: 0.5,
-                    borderRadius: 0.5,
-                    fontFamily: 'monospace',
-                    fontSize: '0.9em'
-                  }}
-                  {...props}
-                />
-              ),
-              pre: (props) => (
-                <Box
-                  component="pre"
-                  sx={{
-                    backgroundColor: role === 'assistant' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
-                    p: 1.5,
-                    borderRadius: 1,
-                    overflow: 'auto',
-                    maxWidth: '100%',
-                    '& code': {
-                      backgroundColor: 'transparent',
-                      p: 0
-                    }
-                  }}
-                  {...props}
-                />
-              )
+              code: ({ className, children, ...props }: ComponentPropsWithoutRef<'code'>) => {
+                const match = /language-(\w+)/.exec(className || '');
+                const codeContent = String(children).replace(/\n$/, '');
+
+                if (!className?.includes('language-')) {
+                  return (
+                    <Typography
+                      component="code"
+                      sx={{
+                        backgroundColor: 'rgba(0,0,0,0.05)',
+                        p: '0.3em 0.4em',
+                        borderRadius: '3px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.85em',
+                        fontWeight: 500
+                      }}
+                      {...props}
+                    >
+                      {children}
+                    </Typography>
+                  );
+                }
+
+                return (
+                  <Box sx={{ position: 'relative', my: 2, overflow: 'hidden', borderRadius: '6px' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        backgroundColor: '#161b22',
+                        borderBottom: '1px solid #30363d',
+                        padding: '4px 16px',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: '#8b949e',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          textTransform: 'lowercase'
+                        }}
+                      >
+                        {match ? match[1] : 'code'}
+                      </Typography>
+                      <Tooltip title={copiedCode === codeContent ? "Copied!" : "Copy code"}>
+                        <IconButton
+                          size="small"
+                          onClick={() => copyToClipboard(codeContent)}
+                          sx={{
+                            color: copiedCode === codeContent ? '#7ee787' : '#8b949e',
+                            '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+                          }}
+                        >
+                          <ContentCopyIcon sx={{ fontSize: '0.85rem' }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                    <SyntaxHighlighter
+                      style={materialDark}
+                      language={match ? match[1] : 'text'}
+                      PreTag="div"
+                      customStyle={{ margin: 0, borderRadius: 0 }}
+                    >
+                      {codeContent}
+                    </SyntaxHighlighter>
+                  </Box>
+                );
+              }
             }}
           >
             {content}

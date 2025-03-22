@@ -68,14 +68,14 @@ const CenterItem = styled(Box)(({ theme }) => ({
   }
 }));
 
-const RightItem = styled(Box)(({ theme }) => ({
-  paddingRight: '16px',
-  fontSize: '0.875rem',
-  marginLeft: 'auto',
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '0.75rem',
-    paddingRight: '8px',
-  }
+// Add styled component for API status similar to the one in page.tsx
+const ApiStatus = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'connected',
+})<{ connected: boolean }>(({ theme, connected }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  color: connected ? theme.palette.success.main : theme.palette.error.main,
 }));
 
 interface ChatLayoutProps {
@@ -91,6 +91,7 @@ export default function ChatLayout({ sessionId, messages, onMessagesUpdate, stre
   const [error, setError] = useState<string | null>(null);
   const [currentImagePath, setCurrentImagePath] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [apiConnected, setApiConnected] = useState(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,6 +100,22 @@ export default function ChatLayout({ sessionId, messages, onMessagesUpdate, stre
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Check API connection status
+  useEffect(() => {
+    const checkApiConnection = async () => {
+      try {
+        // Attempt to make a lightweight API call
+        await apiService.getSessions();
+        setApiConnected(true);
+      } catch (error) {
+        console.error('API connection check failed:', error);
+        setApiConnected(false);
+      }
+    };
+
+    checkApiConnection();
+  }, []);
 
   const handleSendMessage = async (content: string) => {
     if (!sessionId) return;
@@ -246,9 +263,13 @@ export default function ChatLayout({ sessionId, messages, onMessagesUpdate, stre
         />
       </MainArea>
       <Footer>
-        <LeftItem>API Status: Connected</LeftItem>
+        <LeftItem>
+          <ApiStatus connected={apiConnected}>
+            <Box component="span" sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'currentColor' }} />
+            API {apiConnected ? 'Connected' : 'Disconnected'}
+          </ApiStatus>
+        </LeftItem>
         <CenterItem>© 2024 Chatbot</CenterItem>
-        <RightItem>Debug Mode</RightItem>
       </Footer>
     </ChatContainer>
   );

@@ -1,7 +1,10 @@
-import { Box, Typography, Paper } from '@mui/material';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { github } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { Box, Typography, Paper, IconButton } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
+import 'highlight.js/styles/github.css';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { useState } from 'react';
 
 interface CodeBlockProps {
   code: {
@@ -13,26 +16,90 @@ interface CodeBlockProps {
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
+  const [copied, setCopied] = useState(false);
+
+  // Prepare code with language specification for markdown
+  const codeWithLanguage = `\`\`\`${code.language || 'python'}\n${code.content}\n\`\`\``;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <Paper
       elevation={0}
       sx={{
-        mt: 1,
+        mt: 1.5,
+        mb: 1.5,
         borderRadius: 2,
         overflow: 'hidden',
         border: '1px solid',
         borderColor: 'divider',
+        backgroundColor: '#ffffff',
       }}
     >
-      {/* Code syntax highlighting */}
-      <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
-        <SyntaxHighlighter
-          language={code.language || 'python'}
-          style={github}
-          customStyle={{ margin: 0, fontSize: '0.75rem' }}
+      {/* Code header with language and copy button */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 1,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: '#f0f2f5'
+        }}
+      >
+        <Typography variant="caption" sx={{ color: '#57606a', fontWeight: 500, textTransform: 'uppercase' }}>
+          {code.language || 'python'}
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={handleCopy}
+          aria-label="Copy code"
+          title="Copy to clipboard"
+          sx={{
+            fontSize: '0.75rem',
+            color: copied ? '#2e7d32' : '#57606a',
+            '&:hover': { backgroundColor: 'rgba(0,0,0,0.05)', color: '#0969da' }
+          }}
         >
-          {code.content}
-        </SyntaxHighlighter>
+          <ContentCopyIcon fontSize="small" />
+          {copied && (
+            <Typography variant="caption" sx={{ ml: 0.5, fontWeight: 'bold', color: '#2e7d32' }}>
+              Copied!
+            </Typography>
+          )}
+        </IconButton>
+      </Box>
+
+      {/* Code syntax highlighting */}
+      <Box sx={{ backgroundColor: '#f6f8fa', color: '#24292e' }}>
+        <ReactMarkdown
+          rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
+          components={{
+            pre: (props) => (
+              <Box
+                component="pre"
+                sx={{
+                  margin: 0,
+                  fontSize: '0.85rem',
+                  lineHeight: 1.6,
+                  '& code': {
+                    display: 'block',
+                    overflow: 'auto',
+                    p: 1.5
+                  }
+                }}
+                {...props}
+              />
+            )
+          }}
+        >
+          {codeWithLanguage}
+        </ReactMarkdown>
       </Box>
 
       {/* Execution result */}
@@ -48,20 +115,42 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
           <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 0.5 }}>
             Output:
           </Typography>
-          <Typography
-            component="pre"
-            sx={{
-              p: 1,
-              backgroundColor: '#f1f1f1',
-              borderRadius: 1,
-              fontSize: '0.75rem',
-              margin: 0,
-              overflow: 'auto',
-              fontFamily: 'monospace'
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              p: (props) => (
+                <Typography variant="body2" sx={{ my: 0.5 }} {...props} />
+              ),
+              pre: (props) => (
+                <Box
+                  component="pre"
+                  sx={{
+                    p: 1,
+                    backgroundColor: '#f1f1f1',
+                    borderRadius: 1,
+                    fontSize: '0.85rem',
+                    margin: 0,
+                    overflow: 'auto',
+                    fontFamily: 'monospace',
+                    lineHeight: 1.5
+                  }}
+                  {...props}
+                />
+              ),
+              code: (props) => (
+                <Typography
+                  component="code"
+                  sx={{
+                    display: 'block',
+                    fontFamily: 'monospace'
+                  }}
+                  {...props}
+                />
+              )
             }}
           >
-            {code.execution_result}
-          </Typography>
+            {`\`\`\`\n${code.execution_result}\n\`\`\``}
+          </ReactMarkdown>
         </Box>
       )}
 
@@ -79,6 +168,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
             Explanation:
           </Typography>
           <ReactMarkdown
+            rehypePlugins={[rehypeRaw, rehypeHighlight]}
             components={{
               p: (props) => (
                 <Typography variant="body2" sx={{ my: 0.5 }} {...props} />
@@ -110,7 +200,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                   component="code"
                   sx={{
                     backgroundColor: 'rgba(0,0,0,0.05)',
-                    p: 0.5,
+                    p: 0.3,
                     borderRadius: 0.5,
                     fontFamily: 'monospace',
                     fontSize: '0.85rem'
