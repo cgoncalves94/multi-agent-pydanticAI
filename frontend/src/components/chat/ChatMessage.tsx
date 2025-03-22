@@ -5,7 +5,7 @@ import { Message } from '@/types';
 import ReactMarkdown from 'react-markdown';
 
 interface MessageContainerProps {
-  'data-role': 'user' | 'assistant' | 'system';
+  'data-role': 'user' | 'assistant' | 'system' | 'model';
 }
 
 const MessageContainer = styled(Box)<MessageContainerProps>(({ theme, 'data-role': role }) => ({
@@ -34,6 +34,10 @@ const MessageBubble = styled(Paper)(({ theme }) => ({
   '&[data-role="system"]': {
     backgroundColor: theme.palette.warning.light,
     borderRadius: theme.spacing(1),
+  },
+  '&[data-role="model"]': {
+    backgroundColor: theme.palette.grey[100],
+    borderBottomLeftRadius: theme.spacing(0.5),
   },
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(1.2, 1.5),
@@ -147,7 +151,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         )}
       </MessageBubble>
       <MessageMeta>
-        {role === 'user' ? 'You' : role === 'assistant' ? 'Assistant' : 'System'}
+        {role === 'user' ? 'You' : role === 'system' ? 'System' : 'Assistant'}
       </MessageMeta>
     </MessageContainer>
   );

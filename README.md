@@ -1,6 +1,6 @@
 # Pydantic Chatbot
 
-A full-stack multi agent chat system with specialized AI agents for python code generation, web search, and image analysis.
+A full-stack multi-agent chat system with specialized AI agents for Python code generation, web search, and image analysis.
 
 ## Project Structure
 
@@ -41,14 +41,26 @@ Visit [http://localhost:3000](http://localhost:3000) to use the application. The
 
 ## Features
 
-- Multi-agent AI system
-- Python code generation and execution
-- Web search integration
-- Image analysis
-- Session management
-- Modern React frontend
-- RESTful API with FastAPI
-- Real-time streaming responses
+- **Multi-Agent System**: Specialized AI agents for different tasks
+  - **Code Expert**: Generates, explains, and executes Python code
+  - **Search Expert**: Retrieves and summarizes information from the web
+  - **Image Expert**: Analyzes uploaded images with object detection
+
+- **Dual Response Modes**:
+  - **Streaming Responses**: Real-time character-by-character display of AI responses
+  - **Structured Output**: Comprehensive responses with special formatting for code, search results, and image analysis
+
+- **Interactive UI**:
+  - **Right Sidebar**: Displays detailed agent results (code execution, search sources, image analysis)
+  - **Left Sidebar**: Session management and chat history
+  - **Markdown Support**: Rich text formatting in AI responses
+
+- **Additional Features**:
+  - Session management and chat history persistence
+  - Image upload and analysis
+  - Python code execution with results display
+  - Web search with source attribution
+  - Mobile-responsive design
 
 ## Environment Setup
 
@@ -64,6 +76,22 @@ And a `.env.local` file in the frontend directory with:
 ```
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
+
+## Response Modes
+
+### Streaming Mode
+In streaming mode, the AI's response appears character-by-character in real-time, creating a more dynamic and interactive experience. This mode is ideal for casual conversations and provides immediate feedback.
+
+### Structured Output Mode
+In structured output mode, the system provides a complete, formatted response that separates the main answer from specialized agent outputs:
+
+- **Main Chat Area**: Displays the conversational response
+- **Right Sidebar**: Shows detailed structured data:
+  - Code blocks with syntax highlighting and execution results
+  - Search results with source attribution
+  - Image analysis with object detection and scene classification
+
+You can toggle between these modes using the switch in the interface.
 
 ## Technology Stack
 
