@@ -145,22 +145,15 @@ export default function RightSidebar({ messages, open, onClose }: RightSidebarPr
   const hasSearch = results.search_results.length > 0;
   const hasImage = results.image_analysis !== null;
 
-  // Reset tab when sidebar is opened
+  // Reset tab when sidebar is opened or content changes
   useEffect(() => {
     if (open) {
-      // Always reset to the first tab (0) when opening
-      setCurrentTab(0);
+      // Find the first available tab
+      if (hasCode) setCurrentTab(0);
+      else if (hasSearch) setCurrentTab(0);
+      else if (hasImage) setCurrentTab(0);
     }
-  }, [open]);
-
-  // Make sure the current tab is valid when content changes
-  useEffect(() => {
-    const tabCount = [hasCode, hasSearch, hasImage].filter(Boolean).length;
-    if (tabCount > 0 && currentTab >= tabCount) {
-      // If current tab is now invalid, set to the last valid tab
-      setCurrentTab(tabCount - 1);
-    }
-  }, [hasCode, hasSearch, hasImage, currentTab]);
+  }, [open, hasCode, hasSearch, hasImage]);
 
   // Ensure we pick the correct tab index based on which content types are available
   const getTabIndex = (contentType: 'code' | 'search' | 'image'): number => {
