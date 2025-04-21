@@ -30,7 +30,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-model = OpenAIModel("gpt-4o")
+model = OpenAIModel("gpt-4.1-mini")
 
 
 # ===================================================
@@ -61,7 +61,7 @@ class CodeResult(BaseModel):
 class SearchResult(BaseModel):
     """Result from the web search agent"""
 
-    answer: str = Field(description="Answer to the search query")
+    answer: str = Field(description="Comprehensive summary of the search results.")
     sources: list[str] = Field(
         description="Sources used for the answer", default_factory=list
     )
@@ -80,14 +80,16 @@ class ImageAnalysisResult(BaseModel):
 class MainAgentResult(BaseModel):
     """Overall result from the main agent"""
 
-    answer: str = Field(description="Main answer to the query")
-    search_result: Optional[SearchResult] = Field(
+    answer: str = Field(
+        description="The complete answer to the user's question, combining the results of each agents response."
+    )
+    search_result: SearchResult = Field(
         description="Result from the web search agent if used", default=None
     )
-    image_analysis_result: Optional[ImageAnalysisResult] = Field(
+    image_analysis_result: ImageAnalysisResult = Field(
         description="Result from the image analysis agent if used", default=None
     )
-    code_result: Optional[CodeResult] = Field(
+    code_result: CodeResult = Field(
         description="Result from the Python code agent if used", default=None
     )
 
@@ -95,7 +97,24 @@ class MainAgentResult(BaseModel):
 # ===================================================
 # MCP SERVER SETUP (SHARED ACROSS AGENTS)
 # ===================================================
-mcp_server = MCPServerStdio("npx", ["-y", "@pydantic/mcp-run-python", "stdio"])
+mcp_pydantic = MCPServerStdio(
+    command="deno",
+    args=[
+        "run",
+        "-N",
+        "-R=node_modules",
+        "-W=node_modules",
+        "--node-modules-dir=auto",
+        "jsr:@pydantic/mcp-run-python",
+        "stdio",
+    ],
+)
+
+mcp_fetch = MCPServerStdio(
+    command="uvx",
+    args=["mcp-server-fetch"],
+)
+
 
 # ===================================================
 # SPECIALIZED AGENTS
@@ -103,9 +122,9 @@ mcp_server = MCPServerStdio("npx", ["-y", "@pydantic/mcp-run-python", "stdio"])
 # 1. Python Code Agent
 code_agent = Agent(
     model=model,
-    mcp_servers=[mcp_server],  # Share the same MCP server
+    mcp_servers=[mcp_pydantic],
     deps_type=SharedContext,
-    result_type=CodeResult,
+    output_type=CodeResult,
     system_prompt=(
         "You are a coding expert that specializes in Python programming.\n\n"
         "IMPORTANT FORMATTING INSTRUCTIONS:\n"
@@ -119,9 +138,10 @@ code_agent = Agent(
 # 2. Web Search Agent
 search_agent = Agent(
     model=model,
+    mcp_servers=[mcp_fetch],
     tools=[duckduckgo_search_tool()],
     deps_type=SharedContext,
-    result_type=SearchResult,
+    output_type=SearchResult,
     system_prompt=(
         "You are a web search expert that finds accurate information online.\n\n"
         "IMPORTANT FORMATTING INSTRUCTIONS:\n"
@@ -136,7 +156,7 @@ search_agent = Agent(
 image_agent = Agent(
     model=model,
     deps_type=SharedContext,
-    result_type=ImageAnalysisResult,
+    output_type=ImageAnalysisResult,
     system_prompt=(
         "You are an image analysis expert. You will receive binary image data to analyze.\n\n"
         "When you receive the binary image data:\n"
@@ -192,7 +212,7 @@ async def analyze_image_file(file_path: str, ctx: RunContext) -> ImageAnalysisRe
         except Exception as e:
             print(f"Warning: Could not delete temporary file {file_path}: {e}")
 
-        return result.data
+        return result.output
     except Exception as e:
         # Try to clean up even if analysis failed
         try:
@@ -212,9 +232,9 @@ async def analyze_image_file(file_path: str, ctx: RunContext) -> ImageAnalysisRe
 # ===================================================
 main_agent = Agent(
     model=model,
-    mcp_servers=[mcp_server],  # Share the same MCP server
+    mcp_servers=[mcp_pydantic, mcp_fetch],  # Share the same MCP server
     deps_type=SharedContext,
-    result_type=MainAgentResult,
+    output_type=MainAgentResult,
     system_prompt=(
         "You are an AI assistant that can handle a variety of tasks by delegating to specialized agents.\n\n"
         "WHEN TO USE SPECIALIZED TOOLS:\n"
@@ -227,6 +247,7 @@ main_agent = Agent(
         "   - When user asks about current events or real-time information\n"
         "   - When user needs factual information you're not confident about\n"
         "   - When user explicitly asks to search for something\n\n"
+        "   - When user asks to fetch information from a website\n\n"
         "3. Image Expert (image_expert tool):\n"
         "   - ANY TIME the user uploads an image (current_image_path exists in context)\n"
         "   - This is your HIGHEST PRIORITY - if an image is present, ALWAYS analyze it\n"
@@ -247,9 +268,10 @@ main_agent = Agent(
         "   - If you used the code_expert tool, include its result in 'code_result'\n"
         "   - If you used the web_search_expert tool, include its result in 'search_result'\n"
         "   - If you used the image_expert tool, include its result in 'image_analysis_result'\n"
-        "2. NEVER omit a tool's result if you used it - the frontend expects these fields\n"
-        "3. For tools you didn't use, leave their fields as null\n"
-        "4. Your response MUST be properly structured for the UI to work correctly\n\n"
+        "2. Ensure the answer is complete based on the results of any tools you used. Do not reference to the results of any tools in your answer, just use them to form your response."
+        "3. NEVER omit a tool's result if you used it - the frontend expects these fields\n"
+        "4. For tools you didn't use, leave their fields as null\n"
+        "5. Your response MUST be properly structured for the UI to work correctly\n\n"
     ),
 )
 
@@ -296,7 +318,7 @@ async def code_expert(ctx: RunContext[SharedContext], coding_task: str) -> CodeR
         deps=ctx.deps,  # Pass the same deps
         usage=ctx.usage,  # Share usage tracking
     )
-    return result.data
+    return result.output
 
 
 @main_agent.tool
@@ -313,7 +335,7 @@ async def web_search_expert(
         deps=ctx.deps,  # Pass the same deps
         usage=ctx.usage,  # Share usage tracking
     )
-    return result.data
+    return result.output
 
 
 @main_agent.tool
@@ -351,7 +373,7 @@ async def image_expert(
                         deps=ctx.deps,
                         usage=ctx.usage,
                     )
-                    return result.data
+                    return result.output
                 except Exception as e:
                     return ImageAnalysisResult(
                         description=f"Error analyzing image from URL: {str(e)}",
@@ -372,9 +394,9 @@ async def image_expert(
 # ===================================================
 main_agent_stream = Agent(
     model=model,
-    mcp_servers=[mcp_server],
+    mcp_servers=[mcp_pydantic, mcp_fetch],  # Share the same MCP server
     deps_type=SharedContext,
-    result_type=str,  # Use str for streaming
+    output_type=str,  # Use str for streaming
     system_prompt=(
         "You are an AI assistant that can handle a variety of tasks by delegating to specialized agents.\n\n"
         "WHEN TO USE SPECIALIZED TOOLS:\n"
@@ -466,7 +488,7 @@ async def process_query(
             )
 
             return {
-                "result": result.data,
+                "result": result.output,
                 "messages": result.all_messages(),
                 "new_messages": result.new_messages(),
                 "usage": {
@@ -510,7 +532,7 @@ async def process_query_stream(
                     yield {"text": chunk, "done": False}
 
                 # Get final data
-                final_data = await result.get_data()
+                final_data = await result.get_output()
 
                 # For the final message, we don't need to serialize the messages
                 # The library will handle that internally
