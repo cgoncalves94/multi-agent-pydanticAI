@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw';
 import 'highlight.js/styles/github.css';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useState } from 'react';
+import { omitRef } from '../../utils/omitRef';
 
 interface CodeBlockProps {
   code: {
@@ -93,7 +94,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                     p: 1.5
                   }
                 }}
-                {...props}
+                {...omitRef(props)}
               />
             )
           }}
@@ -119,7 +120,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
             rehypePlugins={[rehypeRaw]}
             components={{
               p: (props) => (
-                <Typography variant="body2" sx={{ my: 0.5 }} {...props} />
+                <Typography variant="body2" sx={{ my: 0.5 }} {...omitRef(props)} />
               ),
               pre: (props) => (
                 <Box
@@ -134,7 +135,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                     fontFamily: 'monospace',
                     lineHeight: 1.5
                   }}
-                  {...props}
+                  {...omitRef(props)}
                 />
               ),
               code: (props) => (
@@ -144,7 +145,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                     display: 'block',
                     fontFamily: 'monospace'
                   }}
-                  {...props}
+                  {...omitRef(props)}
                 />
               )
             }}
@@ -171,7 +172,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
             rehypePlugins={[rehypeRaw, rehypeHighlight]}
             components={{
               p: (props) => (
-                <Typography variant="body2" sx={{ my: 0.5 }} {...props} />
+                <Typography variant="body2" sx={{ my: 0.5 }} {...omitRef(props)} />
               ),
               a: (props) => (
                 <Box
@@ -186,14 +187,14 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                       textDecoration: 'underline'
                     }
                   }}
-                  {...props}
+                  {...omitRef(props)}
                 />
               ),
               ul: (props) => (
-                <Box component="ul" sx={{ pl: 2, mt: 1 }} {...props} />
+                <Box component="ul" sx={{ pl: 2, mt: 1 }} {...omitRef(props)} />
               ),
               li: (props) => (
-                <Typography component="li" variant="body2" sx={{ mb: 0.5 }} {...props} />
+                <Typography component="li" variant="body2" sx={{ mb: 0.5 }} {...omitRef(props)} />
               ),
               code: (props) => (
                 <Typography
@@ -205,7 +206,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code }) => {
                     fontFamily: 'monospace',
                     fontSize: '0.85rem'
                   }}
-                  {...props}
+                  {...omitRef(props)}
                 />
               )
             }}

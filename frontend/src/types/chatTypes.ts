@@ -1,3 +1,5 @@
+// Types for chat, session, message, and related core models
+
 export interface Session {
   id: string;
   username: string;

@@ -14,7 +14,7 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import { Session } from '@/types';
+import { Session } from '@/types/chatTypes';
 import { Close, Delete, Add } from '@mui/icons-material';
 import { useState } from 'react';
 

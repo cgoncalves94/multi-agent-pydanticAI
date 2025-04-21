@@ -1,12 +1,12 @@
 import { Box, Typography, Button, keyframes, styled } from '@mui/material';
-import { Message } from '@/types';
+import { Message } from '@/types/chatTypes';
 import { ChatMessage } from './ChatMessage';
 
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   error: string | null;
-  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
 const typingAnimation = keyframes`

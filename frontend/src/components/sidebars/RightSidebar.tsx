@@ -5,8 +5,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import CodeIcon from '@mui/icons-material/Code';
 import SearchIcon from '@mui/icons-material/Search';
 import ImageIcon from '@mui/icons-material/Image';
-import { Message, MessageMetadata } from '@/types';
-import { CodeBlock } from '@/components/chat/CodeBlock';
+import { Message, MessageMetadata, type CodeBlock } from '@/types/chatTypes';
+import { CodeBlock as CodeBlockComponent } from '@/components/chat/CodeBlock';
 import { SearchResults } from '@/components/chat/SearchResults';
 import { ImageAnalysis } from '@/components/chat/ImageAnalysis';
 import { useState, useEffect, useCallback } from 'react';
@@ -131,7 +131,7 @@ export default function RightSidebar({ messages, open, onClose }: RightSidebarPr
         // Convert from original schema
         results.image_analysis = {
           analysis: msg.metadata.image_analysis_result.description,
-          detections: msg.metadata.image_analysis_result.objects.map(obj => ({ label: obj })),
+          detections: msg.metadata.image_analysis_result.objects.map((obj: string) => ({ label: obj })),
           scene_type: msg.metadata.image_analysis_result.scene_type
         };
       }
@@ -154,6 +154,14 @@ export default function RightSidebar({ messages, open, onClose }: RightSidebarPr
       else if (hasImage) setCurrentTab(0);
     }
   }, [open, hasCode, hasSearch, hasImage]);
+
+  // Ensure currentTab is always a valid index when available tabs change
+  useEffect(() => {
+    const availableTabs = [hasCode, hasSearch, hasImage].filter(Boolean).length;
+    if (currentTab > availableTabs - 1) {
+      setCurrentTab(0);
+    }
+  }, [hasCode, hasSearch, hasImage, currentTab]);
 
   // Ensure we pick the correct tab index based on which content types are available
   const getTabIndex = (contentType: 'code' | 'search' | 'image'): number => {
@@ -226,9 +234,9 @@ export default function RightSidebar({ messages, open, onClose }: RightSidebarPr
 
           {hasCode && (
             <TabPanel value={currentTab} index={0}>
-              {results.code.map((codeBlock, index) => (
+              {results.code.map((codeBlock: CodeBlock, index: number) => (
                 <Box key={index} mb={index < results.code.length - 1 ? 2 : 0}>
-                  <CodeBlock code={codeBlock} />
+                  <CodeBlockComponent code={codeBlock} />
                 </Box>
               ))}
             </TabPanel>

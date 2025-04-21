@@ -1,6 +1,7 @@
 import { Box, Typography, Paper } from '@mui/material';
-import { ImageDetection } from '@/types';
+import { ImageDetection } from '@/types/chatTypes';
 import ReactMarkdown from 'react-markdown';
+import { omitRef } from '../../utils/omitRef';
 
 interface ImageAnalysisProps {
   analysis: {
@@ -27,22 +28,22 @@ export const ImageAnalysis: React.FC<ImageAnalysisProps> = ({ analysis }) => {
         <ReactMarkdown
           components={{
             p: (props) => (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }} {...props} />
+              <Typography variant="body2" component="p" color="text.secondary" sx={{ mt: 1 }} {...omitRef(props)} />
             ),
             h1: (props) => (
-              <Typography variant="h6" sx={{ mt: 2, mb: 1 }} {...props} />
+              <Typography variant="h6" component="h1" sx={{ mt: 2, mb: 1 }} {...omitRef(props)} />
             ),
             h2: (props) => (
-              <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }} {...props} />
+              <Typography variant="subtitle1" component="h2" sx={{ mt: 2, mb: 1 }} {...omitRef(props)} />
             ),
             h3: (props) => (
-              <Typography variant="subtitle2" sx={{ mt: 1.5, mb: 0.5 }} {...props} />
+              <Typography variant="subtitle2" component="h3" sx={{ mt: 1.5, mb: 0.5 }} {...omitRef(props)} />
             ),
             ul: (props) => (
-              <Box component="ul" sx={{ pl: 2, mt: 1 }} {...props} />
+              <Box component="ul" sx={{ pl: 2, mt: 1 }} {...omitRef(props)} />
             ),
             li: (props) => (
-              <Typography component="li" variant="body2" color="text.secondary" {...props} />
+              <Typography component="li" variant="body2" color="text.secondary" {...omitRef(props)} />
             ),
             code: (props) => (
               <Typography
@@ -53,7 +54,7 @@ export const ImageAnalysis: React.FC<ImageAnalysisProps> = ({ analysis }) => {
                   borderRadius: 0.5,
                   fontFamily: 'monospace'
                 }}
-                {...props}
+                {...omitRef(props)}
               />
             )
           }}
@@ -78,7 +79,7 @@ export const ImageAnalysis: React.FC<ImageAnalysisProps> = ({ analysis }) => {
           <ReactMarkdown
             components={{
               p: (props) => (
-                <Typography variant="body2" color="text.secondary" {...props} />
+                <Typography variant="body2" component="p" color="text.secondary" {...omitRef(props)} />
               )
             }}
           >

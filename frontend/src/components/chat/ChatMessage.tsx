@@ -1,13 +1,14 @@
 'use client';
 
 import { Box, Paper, Typography, styled, Link, IconButton, Tooltip } from '@mui/material';
-import { Message } from '@/types';
+import { Message } from '@/types/chatTypes';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ComponentPropsWithoutRef, useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { omitRef } from '../../utils/omitRef';
 
 interface MessageContainerProps {
   'data-role': 'user' | 'assistant' | 'system' | 'model';
@@ -87,68 +88,51 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 <Typography
                   variant="body1"
                   component="div"
-                  sx={{
-                    mt: 1,
-                    color: role === 'assistant' ? 'inherit' : 'inherit'
-                  }}
-                  {...props}
+                  sx={{ mt: 1, color: role === 'assistant' ? 'inherit' : 'inherit' }}
+                  {...omitRef(props)}
                 />
               ),
               h1: (props) => (
                 <Typography
                   variant="h6"
-                  sx={{
-                    mt: 2,
-                    mb: 1,
-                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
-                    fontWeight: 600
-                  }}
-                  {...props}
+                  component="h1"
+                  sx={{ mt: 2, mb: 1, color: role === 'assistant' ? '#0a2f5e' : '#fff', fontWeight: 600 }}
+                  {...omitRef(props)}
                 />
               ),
               h2: (props) => (
                 <Typography
                   variant="subtitle1"
-                  sx={{
-                    mt: 2,
-                    mb: 1,
-                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
-                    fontWeight: 600
-                  }}
-                  {...props}
+                  component="h2"
+                  sx={{ mt: 2, mb: 1, color: role === 'assistant' ? '#0a2f5e' : '#fff', fontWeight: 600 }}
+                  {...omitRef(props)}
                 />
               ),
               h3: (props) => (
                 <Typography
                   variant="subtitle2"
-                  sx={{
-                    mt: 1.5,
-                    mb: 0.5,
-                    color: role === 'assistant' ? '#0a2f5e' : '#fff',
-                    fontWeight: 600
-                  }}
-                  {...props}
+                  component="h3"
+                  sx={{ mt: 1.5, mb: 0.5, color: role === 'assistant' ? '#0a2f5e' : '#fff', fontWeight: 600 }}
+                  {...omitRef(props)}
                 />
               ),
               ul: (props) => (
-                <Box component="ul" sx={{ pl: 2, mt: 1 }} {...props} />
+                <Box component="ul" sx={{ pl: 2, mt: 1 }} {...omitRef(props)} />
               ),
               ol: (props) => (
-                <Box component="ol" sx={{ pl: 2, mt: 1 }} {...props} />
+                <Box component="ol" sx={{ pl: 2, mt: 1 }} {...omitRef(props)} />
               ),
               li: (props) => (
-                <Typography component="li" variant="body1" sx={{ mb: 0.5 }} {...props} />
+                <Typography component="li" variant="body1" sx={{ mb: 0.5 }} {...omitRef(props)} />
               ),
               a: (props) => (
                 <Link
+                  component="a"
                   href={props.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{
-                    color: role === 'assistant' ? 'primary.main' : 'inherit',
-                    textDecoration: 'underline'
-                  }}
-                  {...props}
+                  sx={{ color: role === 'assistant' ? 'primary.main' : 'inherit', textDecoration: 'underline' }}
+                  {...omitRef(props)}
                 />
               ),
               code: ({ className, children, ...props }: ComponentPropsWithoutRef<'code'>) => {

@@ -1,6 +1,6 @@
 import { Box, IconButton, Typography } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import { ChatHeaderProps } from '@/types';
+import { ChatHeaderProps } from '@/types/chatTypes';
 import ModeToggle from './ModeToggle';
 
 export default function ChatHeader({ onClearChat, isStructured, onModeToggle }: ChatHeaderProps) {

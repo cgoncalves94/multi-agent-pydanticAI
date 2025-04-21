@@ -1,6 +1,7 @@
 import { Box, Link, Typography, Paper } from '@mui/material';
-import { SearchResult } from '@/types';
+import { SearchResult } from '@/types/chatTypes';
 import ReactMarkdown from 'react-markdown';
+import { omitRef } from '../../utils/omitRef';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -38,10 +39,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
             <ReactMarkdown
               components={{
                 p: (props) => (
-                  <Typography variant="body2" color="text.secondary" {...props} />
+                  <Typography variant="body2" component="p" color="text.secondary" {...omitRef(props)} />
                 ),
                 a: (props) => (
                   <Link
+                    component="a"
                     href={props.href}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -50,14 +52,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
                       textDecoration: 'none',
                       '&:hover': { textDecoration: 'underline' }
                     }}
-                    {...props}
+                    {...omitRef(props)}
                   />
                 ),
                 ul: (props) => (
-                  <Box component="ul" sx={{ pl: 2, mt: 1 }} {...props} />
+                  <Box component="ul" sx={{ pl: 2, mt: 1 }} {...omitRef(props)} />
                 ),
                 li: (props) => (
-                  <Typography component="li" variant="body2" color="text.secondary" {...props} />
+                  <Typography component="li" variant="body2" color="text.secondary" {...omitRef(props)} />
                 ),
                 code: (props) => (
                   <Typography
@@ -68,7 +70,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({ results }) => {
                       borderRadius: 0.5,
                       fontFamily: 'monospace'
                     }}
-                    {...props}
+                    {...omitRef(props)}
                   />
                 )
               }}

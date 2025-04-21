@@ -4,7 +4,7 @@ import { Box, styled } from '@mui/material';
 import ChatHeader from '../chat/ChatHeader';
 import ChatMessages from '../chat/ChatMessages';
 import { ChatInput } from '../chat/ChatInput';
-import { Message } from '@/types';
+import { Message } from '@/types/chatTypes';
 import { useState, useRef, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
 
@@ -269,7 +269,7 @@ export default function ChatLayout({ sessionId, messages, onMessagesUpdate, stre
             API {apiConnected ? 'Connected' : 'Disconnected'}
           </ApiStatus>
         </LeftItem>
-        <CenterItem>© 2024 Chatbot</CenterItem>
+        <CenterItem> 2024 Chatbot</CenterItem>
       </Footer>
     </ChatContainer>
   );
