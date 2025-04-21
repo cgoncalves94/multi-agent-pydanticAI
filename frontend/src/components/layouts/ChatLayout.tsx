@@ -269,7 +269,7 @@ export default function ChatLayout({ sessionId, messages, onMessagesUpdate, stre
             API {apiConnected ? 'Connected' : 'Disconnected'}
           </ApiStatus>
         </LeftItem>
-        <CenterItem> 2024 Chatbot</CenterItem>
+        <CenterItem> 2025 Chatbot</CenterItem>
       </Footer>
     </ChatContainer>
   );

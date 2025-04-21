@@ -2,7 +2,7 @@
 
 import { Box, styled, IconButton, Tooltip } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { Session, Message } from '@/types';
+import { Session, Message } from '@/types/chatTypes';
 import LeftSidebar from '@/components/sidebars/LeftSidebar';
 import RightSidebar from '@/components/sidebars/RightSidebar';
 import ChatLayout from '@/components/layouts/ChatLayout';
@@ -378,7 +378,7 @@ export default function Page() {
           API {apiConnected ? 'Connected' : 'Disconnected'}
         </ApiStatus>
         <Copyright>
-          © 2024 Chatbot
+          © 2025 Chatbot
         </Copyright>
       </Footer>
     </AppContainer>

@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+You can run the frontend using the Makefile from the project root:
+
+- `make frontend` — Run only the frontend UI
+
+Or use the manual steps below:
+
 First, run the development server:
 
 ```bash

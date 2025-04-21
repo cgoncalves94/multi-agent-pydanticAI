@@ -14,13 +14,14 @@ import os
 from datetime import date
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, List, Any
+from typing import Optional, Any
 
 import httpx
 from pydantic import BaseModel, Field
 
 from pydantic_ai import Agent, RunContext, ImageUrl, BinaryContent
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.google_gla import GoogleGLAProvider
+from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai.mcp import MCPServerStdio
 from pydantic_ai.common_tools.duckduckgo import duckduckgo_search_tool
 from pydantic_ai.messages import ModelMessage
@@ -30,7 +31,11 @@ import dotenv
 
 dotenv.load_dotenv()
 
-model = OpenAIModel("gpt-4.1-mini")
+model = GeminiModel(
+    "gemini-2.5-flash-preview-04-17",
+    provider=GoogleGLAProvider(api_key=os.getenv("GEMINI_API_KEY")),
+)
+# model = OpenAIModel("gpt-4.1-mini")
 
 
 # ===================================================
@@ -55,7 +60,9 @@ class CodeResult(BaseModel):
 
     code: str = Field(description="Generated or fixed code")
     explanation: str = Field(description="Explanation of the code")
-    execution_result: str = Field(description="Result of running the code")
+    execution_result: str = Field(
+        description="Only include the content found within the <output>...</output> tags from the code execution result. Do not include <status>, <dependencies>, or any other tags."
+    )
 
 
 class SearchResult(BaseModel):
@@ -125,6 +132,7 @@ code_agent = Agent(
     mcp_servers=[mcp_pydantic],
     deps_type=SharedContext,
     output_type=CodeResult,
+    retries=3,
     system_prompt=(
         "You are a coding expert that specializes in Python programming.\n\n"
         "IMPORTANT FORMATTING INSTRUCTIONS:\n"
@@ -142,6 +150,7 @@ search_agent = Agent(
     tools=[duckduckgo_search_tool()],
     deps_type=SharedContext,
     output_type=SearchResult,
+    retries=3,
     system_prompt=(
         "You are a web search expert that finds accurate information online.\n\n"
         "IMPORTANT FORMATTING INSTRUCTIONS:\n"
@@ -157,6 +166,7 @@ image_agent = Agent(
     model=model,
     deps_type=SharedContext,
     output_type=ImageAnalysisResult,
+    retries=3,
     system_prompt=(
         "You are an image analysis expert. You will receive binary image data to analyze.\n\n"
         "When you receive the binary image data:\n"
@@ -235,6 +245,8 @@ main_agent = Agent(
     mcp_servers=[mcp_pydantic, mcp_fetch],  # Share the same MCP server
     deps_type=SharedContext,
     output_type=MainAgentResult,
+    retries=3,
+    end_strategy="early",
     system_prompt=(
         "You are an AI assistant that can handle a variety of tasks by delegating to specialized agents.\n\n"
         "WHEN TO USE SPECIALIZED TOOLS:\n"
@@ -256,22 +268,17 @@ main_agent = Agent(
         "   - When user mentions an image, URL, picture, or photo\n"
         "   - When user asks you to look at/analyze/describe an image\n\n"
         "IMAGE HANDLING RULES:\n"
-        "1. If current_image_path exists in context, you MUST use image_expert to analyze it\n"
-        "2. Always begin your answer by acknowledging and describing the image\n"
-        "3. Even if the user asks something unrelated, still analyze the image first\n"
-        "4. Never ask 'what would you like to know about this image' - just analyze it\n\n"
-        "IMPORTANT: For general conversation, greetings, or simple questions, DO NOT use any specialized tools.\n"
-        "Just respond naturally using your own knowledge.\n\n"
-        "STRUCTURED OUTPUT RULES:\n"
-        "1. For non-streaming responses, you MUST use the MainAgentResult format with:\n"
-        "   - A comprehensive 'answer' field that summarizes your response\n"
-        "   - If you used the code_expert tool, include its result in 'code_result'\n"
-        "   - If you used the web_search_expert tool, include its result in 'search_result'\n"
-        "   - If you used the image_expert tool, include its result in 'image_analysis_result'\n"
-        "2. Ensure the answer is complete based on the results of any tools you used. Do not reference to the results of any tools in your answer, just use them to form your response."
-        "3. NEVER omit a tool's result if you used it - the frontend expects these fields\n"
-        "4. For tools you didn't use, leave their fields as null\n"
-        "5. Your response MUST be properly structured for the UI to work correctly\n\n"
+        "   1. If current_image_path exists in context, you MUST use image_expert to analyze it\n"
+        "   2. Always begin your answer by acknowledging and describing the image\n"
+        "   3. Even if the user asks something unrelated, still analyze the image first\n"
+        "   4. Never ask 'what would you like to know about this image' - just analyze it\n\n"
+        "IMPORTANT: For general conversation, greetings, or simple questions, DO NOT use any specialized tools.\n\n"
+        "CRITICAL OUTPUT INSTRUCTION:\n"
+        "The user will ONLY see the 'answer' field of your response.\n"
+        "You MUST always compose a fully self-contained answer in the 'answer' field, summarizing and including all important details from any sub-agent results (code, search, image).\n"
+        "NEVER assume the user can see the structured output or any fields other than 'answer'.\n"
+        "If you use a specialized agent, always clearly explain its results in the 'answer' field, including code, explanations, search findings, and image analysis as appropriate.\n\n"
+        "When you use a specialized agent, you MUST also include its result in the corresponding field (search_result, code_result, or image_analysis_result) of the MainAgentResult object, as well as summarizing it in the answer field. Never leave these fields empty if you used a sub-agent.\n\n"
     ),
 )
 
@@ -397,6 +404,7 @@ main_agent_stream = Agent(
     mcp_servers=[mcp_pydantic, mcp_fetch],  # Share the same MCP server
     deps_type=SharedContext,
     output_type=str,  # Use str for streaming
+    retries=3,
     system_prompt=(
         "You are an AI assistant that can handle a variety of tasks by delegating to specialized agents.\n\n"
         "WHEN TO USE SPECIALIZED TOOLS:\n"
@@ -446,7 +454,7 @@ async def process_query(
     session_id: str,
     username: str = "User",
     preferences: dict = None,
-    message_history: List[ModelMessage] = None,
+    message_history: list[ModelMessage] = None,
     usage_limits: UsageLimits = None,
     current_image_path: Optional[str] = None,  # Add image path parameter
 ) -> Any:
@@ -504,7 +512,7 @@ async def process_query_stream(
     session_id: str,
     username: str = "User",
     preferences: dict = None,
-    message_history: List[ModelMessage] = None,
+    message_history: list[ModelMessage] = None,
     usage_limits: UsageLimits = None,
     current_image_path: Optional[str] = None,  # Add image path parameter
 ):

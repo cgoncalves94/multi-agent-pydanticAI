@@ -4,6 +4,12 @@ This is a [FastAPI](https://fastapi.tiangolo.com/) project that powers the multi
 
 ## Getting Started
 
+You can run the backend using the Makefile from the project root:
+
+- `make backend` — Run only the backend API
+
+Or follow the manual steps below:
+
 First, install the Python dependencies using uv:
 
 ```bash
@@ -68,6 +74,7 @@ To learn more about the technologies used in this project:
 - FastAPI - Web framework
 - Pydantic - Data validation
 - OpenAI - AI models
+- Google Gemini - AI models
 - SQLite - Database
 - Logfire - Logging (optional)
 - Uvicorn - ASGI server

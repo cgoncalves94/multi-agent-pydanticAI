@@ -2,6 +2,16 @@
 
 A full-stack multi-agent chat system with specialized AI agents for Python code generation, web search, and image analysis.
 
+## Unified Development with Makefile
+
+This project provides a Makefile for easy development and running of both backend and frontend:
+
+- `make dev` — Run both backend and frontend in development mode (recommended for local development)
+- `make backend` — Run only the backend API
+- `make frontend` — Run only the frontend UI
+
+You can still use the manual steps below if you prefer.
+
 ## Project Structure
 
 - `backend/` - FastAPI backend
@@ -65,7 +75,8 @@ Visit [http://localhost:3000](http://localhost:3000) to use the application. The
 Create a `.env` file in the root directory with:
 
 ```
-OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key (optional)
 LOGFIRE_TOKEN=your_logfire_token_if_using_logfire
 ```
 
@@ -95,5 +106,5 @@ You can toggle between these modes using the switch in the interface.
 
 - **Backend**: FastAPI, Pydantic, SQLite
 - **Frontend**: Next.js, TypeScript, Material UI
-- **AI**: OpenAI GPT-4o
+- **AI**: OpenAI GPT-4o, Google Gemini 2.5 Flash
 - **Tooling**: Uvicorn, Logfire
