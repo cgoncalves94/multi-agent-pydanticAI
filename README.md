@@ -2,77 +2,32 @@
 
 A full-stack multi-agent chat system with specialized AI agents for Python code generation, web search, and image analysis.
 
-## Unified Development with Makefile
-
-This project provides a Makefile for easy development and running of both backend and frontend:
-
-- `make dev` — Run both backend and frontend in development mode (recommended for local development)
-- `make backend` — Run only the backend API
-- `make frontend` — Run only the frontend UI
-
-You can still use the manual steps below if you prefer.
-
-## Project Structure
-
-- `backend/` - FastAPI backend
-- `frontend/` - Next.js frontend
-
-## Getting Started
-
-### Backend
-
-```bash
-# Change directory to backend
-cd backend
-
-# Install dependencies using uv
-pip install uv
-uv pip install -e .
-
-# Run the server
-cd src
-uvicorn app:app --reload
-```
-
-### Frontend
-
-```bash
-# Install dependencies
-cd frontend
-npm install
-
-# Run the development server
-npm run dev
-```
-
-Visit [http://localhost:3000](http://localhost:3000) to use the application. The backend API runs on [http://localhost:8000](http://localhost:8000).
-
 ## Features
 
 - **Multi-Agent System**: Specialized AI agents for different tasks
   - **Code Expert**: Generates, explains, and executes Python code
   - **Search Expert**: Retrieves and summarizes information from the web
   - **Image Expert**: Analyzes uploaded images with object detection
+- **Dual Response Modes**: Streaming and structured output
+- **Interactive UI**: Session management, chat history, markdown support
+- **Additional**: Image upload, Python code execution, web search with source attribution, mobile-responsive design
 
-- **Dual Response Modes**:
-  - **Streaming Responses**: Real-time character-by-character display of AI responses
-  - **Structured Output**: Comprehensive responses with special formatting for code, search results, and image analysis
+## Architecture
 
-- **Interactive UI**:
-  - **Right Sidebar**: Displays detailed agent results (code execution, search sources, image analysis)
-  - **Left Sidebar**: Session management and chat history
-  - **Markdown Support**: Rich text formatting in AI responses
+- `backend/` — FastAPI backend (see [backend/README.md](backend/README.md) for setup)
+- `frontend/` — Next.js frontend (see [frontend/README.md](frontend/README.md) for setup)
 
-- **Additional Features**:
-  - Session management and chat history persistence
-  - Image upload and analysis
-  - Python code execution with results display
-  - Web search with source attribution
-  - Mobile-responsive design
+## Unified Development with Makefile
 
-## Environment Setup
+Use the Makefile for easy development:
 
-Create a `.env` file in the root directory with:
+- `make dev` — Run both backend and frontend (recommended for local development)
+- `make backend` — Run only the backend API
+- `make frontend` — Run only the frontend UI
+
+## Environment Variables
+
+Create a `.env` file in the project root with:
 
 ```
 GEMINI_API_KEY=your_gemini_api_key
@@ -86,25 +41,14 @@ And a `.env.local` file in the frontend directory with:
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-## Response Modes
-
-### Streaming Mode
-In streaming mode, the AI's response appears character-by-character in real-time, creating a more dynamic and interactive experience. This mode is ideal for casual conversations and provides immediate feedback.
-
-### Structured Output Mode
-In structured output mode, the system provides a complete, formatted response that separates the main answer from specialized agent outputs:
-
-- **Main Chat Area**: Displays the conversational response
-- **Right Sidebar**: Shows detailed structured data:
-  - Code blocks with syntax highlighting and execution results
-  - Search results with source attribution
-  - Image analysis with object detection and scene classification
-
-You can toggle between these modes using the switch in the interface.
-
 ## Technology Stack
 
 - **Backend**: FastAPI, Pydantic, SQLite
 - **Frontend**: Next.js, TypeScript, Material UI
 - **AI**: OpenAI GPT-4o, Google Gemini 2.5 Flash
 - **Tooling**: Uvicorn, Logfire
+
+## More Information
+
+- For backend setup, API docs, and advanced usage, see [backend/README.md](backend/README.md)
+- For frontend setup and development, see [frontend/README.md](frontend/README.md)
